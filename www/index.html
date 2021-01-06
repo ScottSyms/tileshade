@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Data Browser</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin=""></script>
+
+    <!-- Opacity controls: https://github.com/lizardtechblog/Leaflet.OpacityControls -->
+    <link rel="stylesheet" href="lib/opacity/Control.Opacity.css" />
+    <script src="lib/opacity/Control.Opacity.js"></script>
+
+    <!-- uncomment to add screenshot button -->
+    <!--
+    <script src="https://unpkg.com/leaflet-simple-map-screenshoter"></script>
+    -->
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+
+var toner = L.tileLayer('http://tile.stamen.com/toner/{z}/{x}/{y}.png', {
+          opacity: 1.0,
+          attribution: 'Tiles &copy; Stamen',
+          maxZoom: 20
+        });
+
+        var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          opacity: 0.2,
+          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+        
+        var mapdata = L.tileLayer('/tiles/{z}/{x}/{y}.png', {
+            minZoom: 1,
+            maxZoom: 20,
+            attribution: 'Map Data'
+        });
+
+        var map = L.map('map', {
+          center: [0, 0],
+          zoom: 2,
+          minZoom: 1,
+          maxZoom: 20,
+          layers: [toner]
+        });
+
+        var baseMaps = {
+            "Terrain": toner,
+            "Satellite": satellite
+        };
+
+        var overlayMaps = {
+          "Data": mapdata
+        };
+
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+        var OpacityLayers = L.Layer.extend({
+          // delegate opacity to multiple layers so we can use opacity controls on multiple maps
+          initialize: function (layers) {
+            this.layers = layers;
+            this.options = {
+              opacity: layers[0].options.opacity
+            };
+          },
+          setOpacity: function (opacity) {
+            this.options.opacity = opacity;
+            for (i = 0, len = this.layers.length; i < len; i++) {
+                this.layers[i].setOpacity(opacity);
+            }
+            return this;
+          }
+        });
+
+        var higherOpacity = new L.Control.higherOpacity({
+          position: 'bottomright'
+        });
+        var lowerOpacity = new L.Control.lowerOpacity({
+          position: 'bottomright'
+        });
+        map.addControl(lowerOpacity);
+        map.addControl(higherOpacity);
+        higherOpacity.setOpacityLayer(new OpacityLayers([toner, satellite]));
+
+        // uncomment to add screenshot button
+        //L.simpleMapScreenshoter().addTo(map)
+    </script>
+  </body>
+</html>
