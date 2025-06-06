@@ -61,15 +61,17 @@ fn generate_tile(zoom: u32, x: u32, y: u32, tree: &RTree<DataPoint>) -> Vec<u8> 
         }
     }
 
-    let max_count = counts.iter().copied().max().unwrap_or(1);
+    let max_count = counts.iter().copied().max().unwrap_or(0);
 
     let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(width, height);
-    for (i, cnt) in counts.into_iter().enumerate() {
-        let val = cnt as f32 / max_count as f32;
-        let color = color_map(val);
-        let x = (i as u32) % width;
-        let y = (i as u32) / width;
-        img.put_pixel(x, y, color);
+    if max_count > 0 {
+        for (i, cnt) in counts.into_iter().enumerate() {
+            let val = cnt as f32 / max_count as f32;
+            let color = color_map(val);
+            let x = (i as u32) % width;
+            let y = (i as u32) / width;
+            img.put_pixel(x, y, color);
+        }
     }
 
     use std::io::Cursor;
@@ -84,7 +86,7 @@ fn generate_tile(zoom: u32, x: u32, y: u32, tree: &RTree<DataPoint>) -> Vec<u8> 
 }
 
 fn color_map(v: f32) -> Rgba<u8> {
-    if v <= 0.0 {
+    if !v.is_finite() || v <= 0.0 {
         return Rgba([0, 0, 0, 0]);
     }
     let r = (255.0 * v) as u8;
