@@ -36,8 +36,19 @@ fn tile2mercator(xtile: u32, ytile: u32, zoom: u32) -> (f64, f64) {
 }
 
 fn lnglat_to_meters(lon: f64, lat: f64) -> (f64, f64) {
-    let x = lon * 20037508.34 / 180.0;
-    let y = ((std::f64::consts::PI / 180.0 * lat).tan().ln()) * 6378137.0;
+    // Web Mercator projection (EPSG:3857) conversion
+    let origin_shift = std::f64::consts::PI * 6378137.0;
+
+    // Easting calculation
+    let x = lon * origin_shift / 180.0;
+
+    // Northing calculation - note the 90+lat adjustment
+    let y = ((90.0 + lat) * std::f64::consts::PI / 360.0)
+        .tan()
+        .ln()
+        * origin_shift
+        / std::f64::consts::PI;
+
     (x, y)
 }
 
