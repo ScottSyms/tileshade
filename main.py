@@ -9,7 +9,7 @@ from pyarrow import csv
 import fastapi
 import pandas as pd
 from pandas.core.frame import DataFrame
-from colorcet import bmw, coolwarm, fire, CET_L18
+from colorcet import bmw, coolwarm, fire
 from datashader import transfer_functions as tf
 from datashader.utils import lnglat_to_meters
 from fastapi import FastAPI, Response
@@ -51,7 +51,8 @@ def generateatile(zoom, x, y):
     agg = csv.points(frame, 'X', 'Y')
     # The image is created from the aggregate object, a color map and aggregation function.
     # Then the object is assighed to a bytestream and returned
-    img = tf.shade(agg, cmap=CET_L18, how='log')
+    # Use a blue to red gradient so that higher ship densities appear redder
+    img = tf.shade(agg, cmap=["blue", "red"], how='log')
     img_io = img.to_bytesio('PNG')
     img_io.seek(0)
     bytes = img_io.read()
