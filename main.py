@@ -54,6 +54,7 @@ def generateatile(zoom, x, y):
     # Use a 3-colour gradient that shifts from blue to yellow and then red.
     # Histogram equalisation helps accentuate changes at low zoom levels.
     img = tf.shade(agg, cmap=["#0000FF", "#FFFF00", "#FF0000"], how='eq_hist')
+
     img_io = img.to_bytesio('PNG')
     img_io.seek(0)
     bytes = img_io.read()
