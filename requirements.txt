@@ -1,0 +1,6 @@
+datashader
+pyarrow
+fastapi
+pandas
+colorcet
+uvicorn
