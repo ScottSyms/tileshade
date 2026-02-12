@@ -51,8 +51,10 @@ def generateatile(zoom, x, y):
     agg = csv.points(frame, 'X', 'Y')
     # The image is created from the aggregate object, a color map and aggregation function.
     # Then the object is assighed to a bytestream and returned
-    # Use a blue to red gradient so that higher ship densities appear redder
-    img = tf.shade(agg, cmap=["blue", "red"], how='log')
+    # Use a 3-colour gradient that shifts from blue to yellow and then red.
+    # Histogram equalisation helps accentuate changes at low zoom levels.
+    img = tf.shade(agg, cmap=["#0000FF", "#FFFF00", "#FF0000"], how='eq_hist')
+
     img_io = img.to_bytesio('PNG')
     img_io.seek(0)
     bytes = img_io.read()
